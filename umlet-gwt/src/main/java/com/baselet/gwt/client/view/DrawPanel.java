@@ -125,7 +125,8 @@ public abstract class DrawPanel extends SimplePanel implements CommandTarget, Ha
 		snapElementsToPointPosition(elementList, targetPanel, new Point(xOffset + SharedConstants.DEFAULT_GRID_SIZE, yOffset + SharedConstants.DEFAULT_GRID_SIZE));
 	}
 
-	/* Changes the coordinates of GridElement in the elementList so that they match a point point coordinates must be absolute, not in draw panel coordinates, but the method accounts for a scrolled drawPanel */
+	/* Changes the coordinates of GridElement in the elementList so that they match a point point coordinates must be absolute, not in draw panel coordinates, but the method accounts for a scrolled drawPanel
+	*  Might ignore exact coordinates to snap things into grid.*/
 	public static void snapElementsToPointPosition(List<GridElement> elementList, DrawPanel targetPanel, Point point) {
 		// ensure that at least one element is there since later code relies on that
 		if (elementList.size() <= 0) {
@@ -153,7 +154,15 @@ public abstract class DrawPanel extends SimplePanel implements CommandTarget, Ha
 			int xOffset = e.getRectangle().x - pivotX;
 			int yOffset = e.getRectangle().y - pivotY;
 			Rectangle visible = targetPanel.getVisibleBounds();
-			e.setLocation(xOffset + point.getX() - targetPanel.getAbsoluteLeft(), yOffset + point.getY() - targetPanel.getAbsoluteTop());
+
+
+			//calculate a purifiedTargetPosition so that elements are not placed out of grid.
+			int xVariation = point.getX() - targetPanel.getAbsoluteLeft();
+			int yVariation = point.getY() - targetPanel.getAbsoluteTop();
+			Point purifiedTargetPosition = new Point(xVariation-(xVariation%SharedConstants.DEFAULT_GRID_SIZE), yVariation-(yVariation%SharedConstants.DEFAULT_GRID_SIZE));
+
+
+			e.setLocation(xOffset + purifiedTargetPosition.getX(), yOffset + purifiedTargetPosition.getY());
 		}
 	}
 
